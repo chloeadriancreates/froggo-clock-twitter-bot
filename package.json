@@ -1,0 +1,21 @@
+{
+    "name": "code",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/chloeadriancreates/cast-party-quotes/issues"
+    },
+    "homepage": "https://github.com/chloeadriancreates/cast-party-quotes#readme",
+    "dependencies": {
+        "firebase": "^9.8.1",
+        "twitter-api-v2": "^1.12.0"
+    },
+    "type": "module"
+}
