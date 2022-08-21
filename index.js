@@ -4,82 +4,93 @@ import { unsplashConfig } from './config.js';
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, child, get, push, update } from "firebase/database";
 import fetch from "node-fetch";
+import download from 'image-downloader';
 
-// const app = initializeApp(firebaseConfig);
-// const dbRef = ref(getDatabase());
+const app = initializeApp(firebaseConfig);
+const dbRef = ref(getDatabase());
 
-// const tweet = async (quotes, arrayLength, type) => {
-//     const random = Math.floor(Math.random() * arrayLength);
-//     const keyRandom = Object.keys(quotes)[random];
-//     console.log(quotes);
-//     console.log(quotes[keyRandom]);
-//     try {
-//         await rwClient.v2.tweet(quotes[keyRandom]);
-//         const newKey = push(child(dbRef, `reminders/tweeted/${type}`)).key;
-//         const updates = {};
-//         updates[`reminders/tweeted/${type}/${newKey}`] = quotes[keyRandom];
-//         updates[`reminders/not_tweeted/${type}/${keyRandom}`] = null;
-//         update(dbRef, updates);
-//     } catch(e) {
-//         console.error(e);
-//     }
-// }
-
-// function start() {
-//     get(child(dbRef, 'id_type')).then((snapshot) => {
-//         const idType = snapshot.val();
-//         console.log(idType);
-//         get(child(dbRef, 'counter')).then((snapshot) => {
-//             const currentCounter = snapshot.val();
-//             if(currentCounter == 2) {
-//                 get(child(dbRef, 'reminders/not_tweeted')).then((snapshot) => {
-//                     const types = Object.keys(snapshot.val());
-//                     const type = types[idType];
-//                     console.log(type);
-//                     get(child(dbRef, `reminders/not_tweeted/${type}`)).then((snapshot) => {
-//                         if(snapshot.val()) {
-//                             const length = Object.keys(snapshot.val()).length;
-//                             tweet(snapshot.val(), length, type);
-//                             console.log(snapshot.val());
-//                         }
-//                         const updates = {};
-//                         const newCounter = 0;
-//                         let newIdType;
-//                         if(idType == types.length - 1) {
-//                             newIdType = 0;
-//                         } else {
-//                             newIdType = idType + 1;
-//                         }
-//                         updates['counter'] = newCounter;
-//                         updates['id_type'] = newIdType;
-//                         update(dbRef, updates);
-//                     }).catch((error) => {
-//                         console.error(error);
-//                     });
-//                 })
-//             } else {
-//                 const updates = {};
-//                 const newCounter = snapshot.val() + 1;
-//                 updates['counter'] = newCounter;
-//                 update(dbRef, updates);
-//             }
-//         });
-//     });
-// }
-
-async function getPhotoFromId(id) {
+async function getPhotoFromID(id) {
     const response = await fetch(`https://api.unsplash.com/photos/${id}/?client_id=${unsplashConfig.ACCESS_KEY}`);
     const responseJSON = await response.json();
-    console.log(responseJSON.urls.full);
+    return responseJSON;
 }
 
-async function getRandomId() {
+async function getRandomFrogID() {
     const response = await fetch(`https://api.unsplash.com/photos/random/?client_id=${unsplashConfig.ACCESS_KEY}&query=frog`);
     const responseJSON = await response.json();
-    const id = await responseJSON.id;
-    console.log(id);
-    getPhotoFromId(id);
+    return await responseJSON.id;
 }
 
-getRandomId();
-// start();
+async function getTweetedIDs() {
+    const response = await get(child(dbRef, 'tweeted'));
+    const tweeted = await response.val();
+    const tweetedIDs = Object.keys(tweeted).map((key) => {
+        return tweeted[key];
+    });
+    return tweetedIDs;
+}
+
+async function getUniqueFrog() {
+    let randomFrogID = await getRandomFrogID();
+    const tweetedIDs = await getTweetedIDs();
+    while(tweetedIDs.includes(randomFrogID)) {
+        randomFrogID = await getRandomFrogID();
+    }
+    const randomFrogPhoto = await getPhotoFromID(randomFrogID);
+    return randomFrogPhoto;
+}
+
+async function tweet() {
+    try {
+        const frog = await getUniqueFrog();
+        const { id } = frog;
+        const url = frog.urls.full;
+        const displayUrl = frog.links.html;
+        const username = frog.user.name;
+        const twitterUsername = frog.user.twitter_username;
+        let tweetText = "" 
+        if (twitterUsername) {
+            tweetText = `Frog by ${username} (@${twitterUsername})`;
+        } else {
+            tweetText = `Frog by ${username}`;
+        }
+        const options = {
+            url: url,
+            dest: `../../img/frog-${id}.jpg`,
+        };
+        download.image(options).then(image => {
+            rwClient.v1.uploadMedia(`./img/frog-${id}.jpg`).then(mediaId => {
+                rwClient.v2.tweet({ 
+                    text: `${tweetText} 🐸 \n${displayUrl}`, 
+                    media: { media_ids: [mediaId] }
+                });
+            })
+        })
+        const newKey = push(child(dbRef, `tweeted/`)).key;
+        const updates = {};
+        updates[`tweeted/${newKey}`] = id;
+        update(dbRef, updates);
+    } catch(e) {
+        console.error(e);
+    }
+}
+
+function updateCounter(value) {
+    const updates = {};
+    const newCounter = value;
+    updates['counter'] = newCounter;
+    update(dbRef, updates);
+}
+
+async function start() {
+    const response = await get(child(dbRef, 'counter'));
+    const currentCounter = await response.val();
+    if(currentCounter == 1) {
+        tweet();
+        updateCounter(0);
+    } else {
+        updateCounter(currentCounter + 1);
+    }
+}
+
+start();
