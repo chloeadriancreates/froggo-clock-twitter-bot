@@ -1,6 +1,5 @@
 import { rwClient } from './twitterClient.js';
-import { firebaseConfig } from './config.js';
-import { unsplashConfig } from './config.js';
+import { firebaseConfig, unsplashConfig } from './config.js';
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, child, get, push, update } from "firebase/database";
 import fetch from "node-fetch";
@@ -76,12 +75,12 @@ async function startFrogs() {
     }
 }
 
-// const job = new CronJob(
-// 	'30 */4 * * *',
-// 	function() {
-// 		startFrogs();
-// 	},
-// 	null,
-// 	true,
-// 	'America/Los_Angeles'
-// );
+const job = new CronJob(
+	'30 */4 * * *',
+	function() {
+		startFrogs();
+	},
+	null,
+	true,
+	'America/Los_Angeles'
+);

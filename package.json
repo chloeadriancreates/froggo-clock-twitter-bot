@@ -1,14 +1,25 @@
 {
-    "name": "code",
-    "version": "1.0.0",
-    "description": "",
+    "name": "froggo-clock-twitter-bot",
+    "version": "2.0.0",
+    "description": "A Twitter bot that tweets a picture of a frog from Unsplash every six hours",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/chloeadriancreates/froggo-clock-twitter-bot.git"
     },
     "keywords": [],
-    "author": "",
+    "author": {
+      "name": "Chloé Adrian",
+      "url": "http://chloeadriancreates.com/"
+    },
     "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/chloeadriancreates/froggo-clock-twitter-bot/issues"
+    },
+    "homepage": "https://github.com/chloeadriancreates/froggo-clock-twitter-bot#readme",
     "dependencies": {
         "cron": "^2.1.0",
         "firebase": "^9.8.1",
@@ -17,4 +28,5 @@
         "twitter-api-v2": "^1.12.0"
     },
     "type": "module"
-}
+  }
+  
