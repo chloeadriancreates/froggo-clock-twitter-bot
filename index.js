@@ -5,6 +5,7 @@ import { initializeApp } from "firebase/app";
 import { getDatabase, ref, child, get, push, update } from "firebase/database";
 import fetch from "node-fetch";
 import download from 'image-downloader';
+import { CronJob } from 'cron';
 
 const app = initializeApp(firebaseConfig);
 const dbRef = ref(getDatabase());
@@ -40,7 +41,7 @@ async function getUniqueFrog() {
     return randomFrogPhoto;
 }
 
-async function tweet() {
+async function startFrogs() {
     try {
         const frog = await getUniqueFrog();
         const { id } = frog;
@@ -75,22 +76,12 @@ async function tweet() {
     }
 }
 
-function updateCounter(value) {
-    const updates = {};
-    const newCounter = value;
-    updates['counter'] = newCounter;
-    update(dbRef, updates);
-}
-
-async function start() {
-    const response = await get(child(dbRef, 'counter'));
-    const currentCounter = await response.val();
-    if(currentCounter == 1) {
-        tweet();
-        updateCounter(0);
-    } else {
-        updateCounter(currentCounter + 1);
-    }
-}
-
-start();
+// const job = new CronJob(
+// 	'30 */4 * * *',
+// 	function() {
+// 		startFrogs();
+// 	},
+// 	null,
+// 	true,
+// 	'America/Los_Angeles'
+// );
