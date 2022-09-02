@@ -9,10 +9,6 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/chloeadriancreates/cast-party-quotes/issues"
-    },
-    "homepage": "https://github.com/chloeadriancreates/cast-party-quotes#readme",
     "dependencies": {
         "firebase": "^9.8.1",
         "image-downloader": "^4.3.0",
