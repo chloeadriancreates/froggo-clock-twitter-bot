@@ -11,6 +11,7 @@ const dbRef = ref(getDatabase());
 
 async function getPhotoFromID(id) {
     const response = await fetch(`https://api.unsplash.com/photos/${id}/?client_id=${unsplashConfig.ACCESS_KEY}`);
+    console.log(response);
     const responseJSON = await response.json();
     return responseJSON;
 }
@@ -22,17 +23,13 @@ async function getRandomFrogID() {
 }
 
 async function getTweetedIDs() {
-    const response = await get(child(dbRef, 'tweeted'));
-    const tweeted = await response.val();
-    const tweetedIDs = Object.keys(tweeted).map((key) => {
-        return tweeted[key];
-    });
+    const response = await get(child(dbRef, 'frogs/tweeted'));
+    const tweetedIDs = await response.val();
     return tweetedIDs;
 }
 
-async function getUniqueFrog() {
+async function getUniqueFrog(tweetedIDs) {
     let randomFrogID = await getRandomFrogID();
-    const tweetedIDs = await getTweetedIDs();
     while(tweetedIDs.includes(randomFrogID)) {
         randomFrogID = await getRandomFrogID();
     }
@@ -42,7 +39,8 @@ async function getUniqueFrog() {
 
 async function startFrogs() {
     try {
-        const frog = await getUniqueFrog();
+        const tweetedIDs = await getTweetedIDs();
+        const frog = await getUniqueFrog(tweetedIDs);
         const { id } = frog;
         const url = frog.urls.full;
         const displayUrl = frog.links.html;
@@ -66,9 +64,8 @@ async function startFrogs() {
                 });
             })
         })
-        const newKey = push(child(dbRef, `tweeted/`)).key;
         const updates = {};
-        updates[`tweeted/${newKey}`] = id;
+        updates[`frogs/tweeted`] = [...tweetedIDs, id];
         update(dbRef, updates);
     } catch(e) {
         console.error(e);
