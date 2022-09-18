@@ -48,9 +48,9 @@ async function startFrogs() {
         const twitterUsername = frog.user.twitter_username;
         let tweetText = "" 
         if (twitterUsername) {
-            tweetText = `Frog by ${username} (@${twitterUsername})`;
+            tweetText = `Photo by ${username} (@${twitterUsername})`;
         } else {
-            tweetText = `Frog by ${username}`;
+            tweetText = `Photo by ${username}`;
         }
         const options = {
             url: url,
